@@ -10,7 +10,7 @@ type ButtonProps = {
   className?: string; 
 };
 
-export const Button: React.FC<ButtonProps> = ({
+const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
   variant = "affirmative",
@@ -25,11 +25,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   switch (variant) {
     case "affirmative":
-      bgClass = "bg-green-600";
+      bgClass = "bg-affirmative-light";
       textClass += " text-white";
       break;
     case "negative":
-      bgClass = "bg-red-600";
+      bgClass = "bg-negative-light";
       textClass += " text-white";
       break;
     case "tertiary":
@@ -49,3 +49,5 @@ export const Button: React.FC<ButtonProps> = ({
     </Pressable>
   );
 };
+
+export default Button;

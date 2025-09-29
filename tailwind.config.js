@@ -13,7 +13,7 @@ module.exports = {
 
       colors: {
         background: {
-          light: "#ffffff",
+          light: "#ffffffff",
           dark: "#121212",
         },
         text: {

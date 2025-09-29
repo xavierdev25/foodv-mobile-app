@@ -5,7 +5,7 @@
     "jsxImportSource": "nativewind", //<-
     "strict": true,
     "paths": {
-      "@/*": [
+      "@/*": [ /* para que el @ lleve de frente a la raíz */
         "./*"
       ]
     }
