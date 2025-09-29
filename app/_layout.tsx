@@ -1,24 +1,39 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "react-native";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme(); // pregunta al celu si su modo es "light"|"dark"|null
+  
+  /*
+  Pero el <theme provider> solo influye para cosas como encabezados que ni usamos, así que todo chill.
+  */
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> 
+    
+      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        
+        <Stack  screenOptions={
+            {
+            headerShown: false,
+            }
+          }
+        >  
+          <Stack.Screen name="index" options={{ title: "Inicio" }} />
+          <Stack.Screen name="nuevo" options={{ title: "Bienvenido" }} />
+
+
+
+
+
+        </Stack>
+
+      </SafeAreaView>
     </ThemeProvider>
   );
 }
