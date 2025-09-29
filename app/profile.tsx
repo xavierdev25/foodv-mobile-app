@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 //custom
 import Container from "@/components/Container";
 import Header from "@/components/Header";
+import  Button from "@/components/Button";
+
 
 const mockUser = {
   name: "Miguel Pérez",
@@ -21,7 +23,7 @@ export default function ProfileScreen() {
   const router = useRouter();
 
   return (
-    <Container layout="padded">
+    <Container >
       <Header
         title="Tu perfil"
         showBack

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+//customs
 import Container from "@/components/Container";
 import CartItem from "@/components/CartItem";
+import Header from "@/components/Header";
+import  Button from "@/components/Button";
 
 const mockCart = [
   {
@@ -21,8 +25,15 @@ const mockCart = [
 ];
 
 const Cart = () => {
+  const router = useRouter();
+  
   const [cartItems, setCartItems] = useState(mockCart);
+  
+  const handleConfirm = () => {
+    console.log("### Renderiza el inicio del checkout.");
 
+    router.push("/pickUpMethod");
+  };
   const handleIncrease = (id: string) => {
     setCartItems((items) =>
       items.map((item) =>
@@ -47,10 +58,12 @@ const Cart = () => {
   );
 
   return (
-    <Container layout="padded">
-      <Text className="text-xl font-bold mb-4 text-black dark:text-white">
-        Carrito
-      </Text>
+    <Container>
+      <Header
+        title="Carrito"
+        showBack
+        showProfile
+      />
 
       <FlatList
         data={cartItems}
@@ -74,11 +87,12 @@ const Cart = () => {
         </Text>
       </View>
 
-      <Pressable className="bg-affirmative-light dark:bg-affirmative-dark py-3 rounded-lg">
-        <Text className="text-center text-white font-bold text-lg">
-          Confirmar Pedido
-        </Text>
-      </Pressable>
+      <Button 
+      variant="affirmative" 
+      title="Confirmar Pedido"
+      onPress={handleConfirm}
+      >
+      </Button>
     </Container>
   );
 };

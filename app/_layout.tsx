@@ -30,6 +30,10 @@ export default function RootLayout() {
           <Stack.Screen name="products" options={{ title: "Productos" }} />
           <Stack.Screen name="profile" options={{ title: "Perfil" }} />
           <Stack.Screen name="cart" options={{ title: "Carrito de Compra" }} />
+          <Stack.Screen name="pickUpMethod" options={{ title: "Método de entrega" }} />
+          <Stack.Screen name="paymentMethod" options={{ title: "Método de pago" }} />
+          <Stack.Screen name="deliveryLocation" options={{ title: "Lugar de entega" }} />
+          <Stack.Screen name="checkout" options={{ title: "Verificar pedido" }} />
 
 
 
