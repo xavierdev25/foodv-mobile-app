@@ -1,9 +1,11 @@
 import React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
+//customs
 import StoreCard from "@/components/StoreCard";
 import Header from "@/components/Header";
 import Container from "@/components/Container";
+import ThemedText from "@/components/ThemedText";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -14,7 +16,7 @@ export default function HomeScreen() {
       id: "1",
       name: "Minimarket La Esquina",
       imageUrl:
-        "@/assets/images/icon.png",
+        "https://via.placeholder.com/150/771796",
       category: "minimarket",
     },
     {
@@ -39,20 +41,18 @@ export default function HomeScreen() {
       <Header
         title="Inicio"
         showProfile
-        onProfilePress={() => router.push("/nuevo")}
         showCart
         cartCount={2}
-        onCartPress={() => router.push("/nuevo")}
       />
 
       {/* Mensaje de bienvenida */}
       <View className="px-4 py-3">
-        <Text className="text-xl font-semibold text-black dark:text-white">
-          Bienvenido user 👋
-        </Text>
-        <Text className="text-base text-neutral-600 dark:text-neutral-400">
+        <ThemedText className="text-xl font-semibold">
+          Bienvenido user
+        </ThemedText>
+        <ThemedText className="text-base text-neutral-600 dark:text-neutral-400">
           Haga su pedido
-        </Text>
+        </ThemedText>
       </View>
 
       {/* Lista de stores */}
@@ -63,10 +63,79 @@ export default function HomeScreen() {
             name={store.name}
             imageUrl={store.imageUrl}
             category={store.category}
-            onPress={() => router.push("/nuevo")} 
+            onPress={() => router.push("/products")} 
           />
         ))}
       </ScrollView>
     </Container>
   );
 }
+
+// import React, { useEffect, useState } from "react";
+// import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+// import { useRouter } from "expo-router";
+// import StoreCard from "../components/StoreCard";
+// import Header from "../components/Header";
+
+// export default function HomeScreen() {
+//   const router = useRouter();
+//   const [stores, setStores] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const fetchStores = async () => {
+//       try {
+//         const res = await fetch("http://TU_BACKEND/api/stores");
+//         const data = await res.json();
+//         setStores(data);
+//       } catch (err) {
+//         console.error(err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchStores();
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       <View className="flex-1 items-center justify-center">
+//         <ActivityIndicator size="large" />
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <Container>
+//       <Header
+//         title="Inicio"
+//         showProfile
+//         onProfilePress={() => router.push("/profile")}
+//         showCart
+//         cartCount={2}
+//         onCartPress={() => router.push("/cart")}
+//       />
+//       <View className="px-4 py-3">
+//         <Text className="text-xl font-semibold text-black dark:text-white">
+//           Bienvenido user 👋
+//         </Text>
+//         <Text className="text-base text-neutral-600 dark:text-neutral-400">
+//           Haga su pedido
+//         </Text>
+//       </View>
+
+//       <ScrollView contentContainerStyle={{ padding: 16 }}>
+//         {stores.map((store) => (
+//           <StoreCard
+//             key={store.id}
+//             name={store.name}
+//             imageUrl={store.imageUrl}
+//             category={store.category}
+//             onPress={() => router.push(`/products/${store.id}`)}
+//           />
+//         ))}
+//       </ScrollView>
+//     </Container>
+//   );
+// }

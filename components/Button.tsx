@@ -25,16 +25,16 @@ const Button: React.FC<ButtonProps> = ({
 
   switch (variant) {
     case "affirmative":
-      bgClass = "bg-affirmative-light";
-      textClass += " text-white";
+      bgClass = "bg-affirmative-light dark:bg-affirmative-dark";
+      textClass += " text-text-light dark:text-text-dark";
       break;
     case "negative":
-      bgClass = "bg-negative-light";
-      textClass += " text-white";
+      bgClass = "bg-negative-light dark:bg-negative-dark";
+      textClass += " text-text-light dark:text-text-dark";
       break;
     case "tertiary":
-      bgClass = "bg-tertiary-light";
-      textClass += " text-gray-800";
+      bgClass = "bg-tertiary-light dark:bg-tertiary-dark";
+      textClass += " text-text-light dark:text-text-dark";
       break;
   }
 

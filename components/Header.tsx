@@ -1,6 +1,9 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { ArrowLeft, ShoppingCart, User } from "lucide-react-native";
+import { useRouter } from "expo-router"; 
+//custom
+import ThemedText from "@/components/ThemedText";
 
 type HeaderProps = {
   title?: string;               // Nombre de la pantalla
@@ -23,25 +26,38 @@ const Header: React.FC<HeaderProps> = ({
   showProfile = false,
   onProfilePress,
 }) => {
+  const router = useRouter();
+
+  const handleBackPress = () => {
+    router.back();  
+  };
+  const handleProfilePress = () => {
+    router.push("/profile");  
+  };
+
+  const handleCartPress = () => {
+     router.push("/cart"); 
+  };
+
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-background-light dark:bg-background-dark border-b border-neutral-200 dark:border-neutral-700">
+    <View className="flex-row items-center justify-between px-4 py-3 bg-background-light dark:bg-background-dark border-b border-neutral-100 dark:border-neutral-600">
 
       <View className="flex-row items-center">
         {showBack && (
-          <Pressable onPress={onBackPress} className="mr-3">
+          <Pressable onPress={handleBackPress} className="mr-3">
             <ArrowLeft size={24} color="black" />
           </Pressable>
         )}
         {title && (
-          <Text className="text-lg font-semibold text-black dark:text-white">
+          <ThemedText className="text-lg font-semibold">
             {title}
-          </Text>
+          </ThemedText>
         )}
       </View>
 
       <View className="flex-row items-center space-x-4">
         {showCart && (
-          <Pressable onPress={onCartPress} className="relative mr-3">
+          <Pressable onPress={handleCartPress} className="relative mr-3">
             <ShoppingCart size={24} color="black" />
             {cartCount > 0 && (
               <View className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 items-center justify-center">
@@ -51,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({
           </Pressable>
         )}
         {showProfile && (
-          <Pressable onPress={onProfilePress}>
+          <Pressable onPress={handleProfilePress}>
             <User size={24} color="black" />
           </Pressable>
         )}

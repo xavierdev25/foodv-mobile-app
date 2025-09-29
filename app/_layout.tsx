@@ -24,8 +24,13 @@ export default function RootLayout() {
             }
           }
         >  
-          <Stack.Screen name="index" options={{ title: "Inicio" }} />
-          <Stack.Screen name="nuevo" options={{ title: "Bienvenido" }} />
+          <Stack.Screen name="index" options={{ title: "Bienvenido" }} />
+          <Stack.Screen name="nuevo" options={{ title: "Placeholder" }} />
+          <Stack.Screen name="home" options={{ title: "Inicio" }} />
+          <Stack.Screen name="products" options={{ title: "Productos" }} />
+          <Stack.Screen name="profile" options={{ title: "Perfil" }} />
+          <Stack.Screen name="cart" options={{ title: "Carrito de Compra" }} />
+
 
 
 

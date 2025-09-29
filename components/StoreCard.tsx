@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, Image, Pressable } from "react-native";
+//customs
+import ThemedText from "./ThemedText";
 
 type StoreCardProps = {
   name: string;
@@ -30,7 +32,7 @@ const StoreCard: React.FC<StoreCardProps> = ({
         className="w-16 h-16 rounded-lg mr-4"
       />
       <View className="flex-1">
-        <Text className="text-lg font-semibold text-black dark:text-white">
+        <Text className="text-lg font-semibold text-text-light dark:text-text-dark">
           {name}
         </Text>
         <Text

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewProps } from "react-native";
+import { View, ViewProps, ScrollView } from "react-native";
 import { tv } from "tailwind-variants";
 
 const container = tv({
@@ -19,9 +19,22 @@ const container = tv({
 interface ContainerProps extends ViewProps {
   children: React.ReactNode;
   layout?: "default" | "centered" | "padded";
+  scrolleable?: boolean;
 }
 
-const Container = ({ children, layout, ...props }: ContainerProps) => {
+const Container = ({ children, layout, scrolleable, ...props }: ContainerProps) => {
+  if (scrolleable) {
+    return (
+      <ScrollView 
+        className={container({ layout })} 
+        contentContainerStyle={{ flexGrow: 1 }} // asegura que se estire
+        {...props}
+      >
+        {children}
+      </ScrollView>
+    );
+  }
+
   return (
     <View className={container({ layout })} {...props}>
       {children}
