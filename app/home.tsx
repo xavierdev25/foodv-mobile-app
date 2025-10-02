@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { getStores } from "@/lib/api";
+
 // customs
 import StoreCard from "@/components/StoreCard";
 import Header from "@/components/Header";
@@ -15,7 +17,7 @@ type Store = {
   description: string;
   isActive: boolean;
   createdAt: string;
-  imageUrl?: string; // 🚨 el backend no lo tiene, deberías añadirlo en BD o asignar un placeholder
+  imageUrl?: string; // 🚨 el backend no lo tiene
 };
 
 export default function HomeScreen() {
@@ -24,33 +26,29 @@ export default function HomeScreen() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/stores", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
-        if (data.success) {
-          // `data.data` es el array que viene en ApiResponse
-          setStores(
-            data.data.map((s: Store) => ({
-              ...s,
-              imageUrl: s.imageUrl || "https://via.placeholder.com/150/771796",
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error cargando stores", error);
-      } finally {
-        setLoading(false);
+// HomeScreen.tsx
+useEffect(() => {
+  const fetchStores = async () => {
+    try {
+      const data = await getStores();
+      if (data.success) {
+        setStores(
+          data.data.map((s: Store) => ({
+            ...s,
+            imageUrl: s.imageUrl || "https://via.placeholder.com/150/771796",
+          }))
+        );
       }
-    };
+    } catch (error) {
+      console.error("Error cargando stores", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchStores();
-  }, [token]);
+  fetchStores();
+}, [token]);
+
 
   return (
     <Container>

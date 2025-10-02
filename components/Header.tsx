@@ -16,27 +16,31 @@ type HeaderProps = {
   onProfilePress?: () => void;
 };
 
+import { useCartStore } from "@/store/cartStore";
+
 const Header: React.FC<HeaderProps> = ({
   title,
   showBack = false,
   onBackPress,
   showCart = false,
-  cartCount = 0,
   onCartPress,
   showProfile = false,
   onProfilePress,
 }) => {
   const router = useRouter();
 
+  // 👇 leer items globalmente
+  const items = useCartStore((state) => state.items);
+  const cartCount = items.length;
+
   const handleBackPress = () => {
-    router.back();  
+    onBackPress ? onBackPress() : router.back();
   };
   const handleProfilePress = () => {
-    router.push("/profile");  
+    onProfilePress ? onProfilePress() : router.push("/profile");
   };
-
   const handleCartPress = () => {
-     router.push("/cart"); 
+    onCartPress ? onCartPress() : router.push("/cart");
   };
 
   return (
@@ -49,9 +53,7 @@ const Header: React.FC<HeaderProps> = ({
           </Pressable>
         )}
         {title && (
-          <ThemedText className="text-lg font-semibold">
-            {title}
-          </ThemedText>
+          <ThemedText className="text-lg font-semibold">{title}</ThemedText>
         )}
       </View>
 
@@ -72,7 +74,6 @@ const Header: React.FC<HeaderProps> = ({
           </Pressable>
         )}
       </View>
-      
     </View>
   );
 };

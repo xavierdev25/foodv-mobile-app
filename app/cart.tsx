@@ -1,123 +1,182 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, FlatList, Pressable, Alert } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-//customs
-import Container from "@/components/Container";
+import { useAuth } from "@/contexts/AuthContext"; // asegúrate de tener esto
+import { useCartStore } from "@/store/cartStore";
 import CartItem from "@/components/CartItem";
+import Container from "@/components/Container";
 import Header from "@/components/Header";
-import  Button from "@/components/Button";
 
-const mockCart = [
-  {
-    id: "1",
-    name: "Manzana",
-    price: 1.5,
-    quantity: 2,
-    imageUrl: "https://via.placeholder.com/100x100.png?text=🍎",
-  },
-  {
-    id: "2",
-    name: "Pan",
-    price: 0.8,
-    quantity: 5,
-    imageUrl: "https://via.placeholder.com/100x100.png?text=🥖",
-  },
-];
-
-const Cart = () => {
+export default function CartScreen() {
   const router = useRouter();
-  
-  const [cartItems, setCartItems] = useState(mockCart);
-  
-  const handleConfirm = () => {
-    console.log("### Renderiza el inicio del checkout.");
+  const { token } = useAuth(); // token desde el contexto/auth
+  const { items, fetchCart, addOrUpdateItem, removeItem, clearCart } = useCartStore();
+  console.log('Items en el carrito:', items);  // Para verificar que los datos estén completos
 
-    router.push("/pickUpMethod");
-  };
-  const handleIncrease = (id: string) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
+  // Traer carrito al montar (usa el token del auth)
+  useEffect(() => {
+    if (token) {
+      fetchCart(token).catch((e) => console.error("fetchCart error:", e));
+    }
+  }, [token]);
 
-  const handleDecrease = (id: string) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-  };
-
-  const total = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const total = items.reduce((sum, item) => sum + item.productPrice * item.quantity, 0);
 
   return (
     <Container>
-      <Header
-        title="Carrito"
-        showBack
-        showProfile
-      />
+      <Header title="Carrito" showBack showProfile showCart />
 
-      <FlatList
-        data={cartItems}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <CartItem
-            name={item.name}
-            price={item.price}
-            quantity={item.quantity}
-            imageUrl={item.imageUrl}
-            onIncrease={() => handleIncrease(item.id)}
-            onDecrease={() => handleDecrease(item.id)}
+      {items.length === 0 ? (
+        <View className="flex-1 items-center justify-center">
+          <Ionicons name="cart-outline" size={64} color="#6B7280" />
+          <Text className="text-gray-500 mt-4">Tu carrito está vacío</Text>
+        </View>
+      ) : (
+        <>
+          <FlatList
+            data={items}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <CartItem
+                name={item.productName}
+                price={item.productPrice}
+                quantity={item.quantity}
+                onIncrease={async () => {
+                  if (!token) {
+                    Alert.alert("Inicia sesión para modificar el carrito");
+                    return;
+                  }
+                  await addOrUpdateItem(item.productId, item.quantity + 1, token);
+                }}
+                onDecrease={async () => {
+                  if (!token) return;
+                  await addOrUpdateItem(item.productId, Math.max(0, item.quantity - 1), token);
+                }}
+              />
+            )}
+            contentContainerStyle={{ paddingBottom: 24 }}
           />
-        )}
-        className="mb-6"
-      />
 
-      <View className="items-end mb-4">
-        <Text className="text-lg font-semibold text-black dark:text-white">
-          Total: S/ {total.toFixed(2)}
-        </Text>
-      </View>
+          {/* Total y acciones */}
+          <View className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <Text className="text-lg font-semibold text-black dark:text-white mb-2">
+              Total: S/ {total.toFixed(2)}
+            </Text>
 
-      <Button 
-      variant="affirmative" 
-      title="Confirmar Pedido"
-      onPress={handleConfirm}
-      >
-      </Button>
+            <Pressable
+              onPress={() => router.push("/checkout")}
+              className="bg-primary py-3 rounded-lg items-center mb-3"
+            >
+              <Text className="text-white font-bold text-lg">Proceder al pago</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={async () => {
+                try {
+                  // store.clearCart() no espera args (usa token almacenado internamente)
+                  await clearCart();
+                } catch (e) {
+                  Alert.alert("Error", "No se pudo vaciar el carrito.");
+                }
+              }}
+              className="bg-gray-200 dark:bg-gray-700 py-3 rounded-lg items-center"
+            >
+              <Text className="text-gray-800 dark:text-gray-100 font-semibold">
+                Vaciar carrito
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      )}
     </Container>
   );
-};
+}
 
-export default Cart;
 
-/*
+// import React from "react";
+// import { View, Text, FlatList, Pressable, Alert } from "react-native";
+// import { useRouter } from "expo-router";
+// import { Ionicons } from "@expo/vector-icons";
 
-import { useEffect, useState } from "react";
-// import { fetchCart } from "@/services/cartApi"; 
+// import Container from "@/components/Container";
+// import Header from "@/components/Header";
+// import CartItem from "@/components/CartItem";
+// import { useCartStore } from "@/store/cartStore";
+// import { useAuth } from "@/contexts/AuthContext";
 
-const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
+// export default function CartScreen() {
+//   const router = useRouter();
+//   const { token } = useAuth();
+//   const { items, addOrUpdateItem, clearCart } = useCartStore();
 
-  useEffect(() => {
-    const loadCart = async () => {
-      try {
-        const data = await fetchCart(); 
-        setCartItems(data);
-      } catch (error) {
-        console.error("Error cargando carrito:", error);
-      }
-    };
+//   const total = items.reduce(
+//     (sum, item) => sum + item.price * item.quantity,
+//     0
+//   );
 
-    loadCart();
-  }, []);
+//   return (
+//     <Container>
+//       <Header title="Carrito" showBack showProfile />
 
-*/
+//       {items.length === 0 ? (
+//         <View className="flex-1 items-center justify-center">
+//           <Ionicons name="cart-outline" size={64} color="#6B7280" />
+//           <Text className="text-gray-500 mt-4">Tu carrito está vacío</Text>
+//         </View>
+//       ) : (
+//         <>
+//           <FlatList
+//             data={items}
+//             keyExtractor={(item) => item.id.toString()}
+//             renderItem={({ item }) => (
+//               <CartItem
+//                 name={item.name}
+//                 price={item.price}
+//                 quantity={item.quantity}
+//                 onIncrease={() =>
+//                   token && addOrUpdateItem(item.productId, item.quantity + 1, token)
+//                 }
+//                 onDecrease={() =>
+//                   token && addOrUpdateItem(item.productId, Math.max(0, item.quantity - 1), token)
+//                 }
+//               />
+//             )}
+//             contentContainerStyle={{ paddingBottom: 24 }}
+//           />
+
+//           {/* Total + Acciones */}
+//           <View className="p-4 border-t border-gray-200 dark:border-gray-700">
+//             <Text className="text-lg font-semibold text-black dark:text-white mb-2">
+//               Total: S/ {total.toFixed(2)}
+//             </Text>
+
+//             <Pressable
+//               onPress={() => router.push("/checkout")}
+//               className="bg-primary py-3 rounded-lg items-center mb-3"
+//             >
+//               <Text className="text-white font-bold text-lg">
+//                 Proceder al pago
+//               </Text>
+//             </Pressable>
+
+//             <Pressable
+//               onPress={async () => {
+//                 try {
+//                   await clearCart(); 
+//                 } catch (e) {
+//                   Alert.alert("Error", "No se pudo vaciar el carrito.");
+//                 }
+//               }}
+//               className="bg-gray-200 dark:bg-gray-700 py-3 rounded-lg items-center"
+//             >
+//               <Text className="text-gray-800 dark:text-gray-100 font-semibold">
+//                 Vaciar carrito
+//               </Text>
+//             </Pressable>
+//           </View>
+//         </>
+//       )}
+//     </Container>
+//   );
+// }
