@@ -34,7 +34,9 @@ function AppStack() {
       <Stack.Screen name="paymentMethod" options={{ title: "Método de pago" }} />
       <Stack.Screen name="deliveryLocation" options={{ title: "Lugar de entrega" }} />
       <Stack.Screen name="checkout" options={{ title: "Verificar pedido" }} />
-      {/* Más pantallas aquí */}
+      <Stack.Screen name="paymentSim" options={{ title: "Realizar pago" }} />
+
+      {/* Las pantallas aquí */}
     </Stack>
   );
 }

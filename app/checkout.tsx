@@ -1,93 +1,82 @@
-import React from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
-import Container from "../components/Container";
+import React, { useState } from "react";
+import { View, Text, Pressable, Alert, ScrollView, TextInput } from "react-native";
+import { useCheckoutStore } from "@/store/checkoutStore";
+import { useCartStore } from "@/store/cartStore";
+import { createOrder } from "@/lib/api";
+import Header from "@/components/Header";
 import { useRouter } from "expo-router";
 
-const mockCart = [
-  { id: "1", name: "Galletas", price: 2.5, quantity: 2 },
-  { id: "2", name: "Jugo", price: 3.0, quantity: 1 },
-];
-
-const mockPaymentMethod = "Efectivo";
-const mockDeliveryLocation = "Pabellón A - Piso 2 - Aula 203";
-
-const Checkout = () => {
+const CheckoutScreen = () => {
   const router = useRouter();
 
-  const total = mockCart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const { items, token, clearCart } = useCartStore();
+  const { deliveryMethod, location, paymentMethod, notes, setNotes, reset } = useCheckoutStore();
 
-  const handleFinish = () => {
-    console.log("Pedido confirmado!");
-    router.push("/home");
-    //mmc : tal vez añadir un toast
+  const total = items.reduce((sum, i) => sum + i.productPrice * i.quantity, 0);
+
+  const handleConfirm = async () => {
+    if (!deliveryMethod) return Alert.alert("Atención", "Selecciona un método de entrega.");
+    if (deliveryMethod === "MINI_DELIVERY" && !location)
+      return Alert.alert("Atención", "Selecciona una ubicación de entrega.");
+    if (!paymentMethod) return Alert.alert("Atención", "Selecciona un método de pago.");
+
+    try {
+      const requestBody = {
+        deliveryMethod,
+        paymentMethod,
+        notes,
+        pabellon: location?.building ?? "",
+        piso: location?.floor ?? "",
+        salon: location?.room ?? "",
+      };
+
+      await createOrder(requestBody, token!); 
+      await clearCart(); // vacía carrito local y backend si aplica
+      reset();
+      router.push("/paymentSim");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "No se pudo completar el pedido.");
+    }
   };
 
   return (
-    <Container layout="padded">
-      <Text className="text-2xl font-bold mb-4 dark:text-text-dark text-text-light">
-        Resumen del Pedido
-      </Text>
-
-      {/* Productos */}
-      <FlatList
-        data={mockCart}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="flex-row justify-between mb-2 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-            <Text className="dark:text-text-dark text-text-light">
-              {item.name} × {item.quantity}
-            </Text>
-            <Text className="dark:text-text-dark text-text-light">
-              S/ {(item.price * item.quantity).toFixed(2)}
-            </Text>
+    <ScrollView>
+      <Header title="Resumen del pedido" showBack />
+      <View className="p-4 space-y-4">
+        <Text className="text-lg font-semibold">Productos</Text>
+        {items.map((item) => (
+          <View key={item.productId} className="flex-row justify-between">
+            <Text>{item.productName} x {item.quantity}</Text>
+            <Text>S/ {item.productPrice * item.quantity}</Text>
           </View>
+        ))}
+
+        <Text className="text-lg font-semibold mt-4">Detalles del pedido</Text>
+        <Text>Método de entrega: {deliveryMethod}</Text>
+        {deliveryMethod === "MINI_DELIVERY" && location && (
+          <Text>Ubicación: {location.building} - {location.floor} - {location.room}</Text>
         )}
-      />
+        <Text>Método de pago: {paymentMethod}</Text>
 
-      {/* Pago */}
-      <View className="mt-4">
-        <Text className="font-semibold dark:text-text-dark text-text-light">
-          Método de pago:
-        </Text>
-        <Text className="dark:text-text-dark text-text-light">
-          {mockPaymentMethod}
-        </Text>
+        <TextInput
+          value={notes}
+          onChangeText={setNotes}
+          placeholder="Notas adicionales..."
+          className="border p-2 rounded"
+        />
+
+        <Text className="text-lg font-bold mt-4">Total: S/ {total.toFixed(2)}</Text>
+
+        <Pressable
+          onPress={handleConfirm}
+          className="bg-affirmative-light py-3 rounded-lg mt-6"
+        >
+          <Text className="text-white text-center font-bold">Confirmar pedido</Text>
+        </Pressable>
       </View>
-
-      {/* Ubicación */}
-      <View className="mt-4">
-        <Text className="font-semibold dark:text-text-dark text-text-light">
-          Entrega en:
-        </Text>
-        <Text className="dark:text-text-dark text-text-light">
-          {mockDeliveryLocation}
-        </Text>
-      </View>
-
-      {/* Total */}
-      <View className="mt-6 flex-row justify-between">
-        <Text className="text-lg font-bold dark:text-text-dark text-text-light">
-          Total:
-        </Text>
-        <Text className="text-lg font-bold dark:text-text-dark text-text-light">
-          S/ {total.toFixed(2)}
-        </Text>
-      </View>
-
-      {/* Botón Finalizar */}
-      <Pressable
-        className="mt-8 bg-affirmative-light dark:bg-affirmative-dark rounded-xl p-4"
-        onPress={handleFinish}
-      >
-        <Text className="text-center text-white font-semibold text-lg">
-          Finalizar Pedido
-        </Text>
-      </Pressable>
-    </Container>
+    </ScrollView>
   );
 };
 
-export default Checkout;
+export default CheckoutScreen;

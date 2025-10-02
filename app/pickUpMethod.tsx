@@ -1,66 +1,41 @@
-import React, { useState } from "react";
-import { View, Text } from "react-native";
-import { Bike, Store } from "lucide-react-native";
+import { View, Text, Pressable } from "react-native";
+import { useCheckoutStore } from "@/store/checkoutStore";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Store , Bike} from "lucide-react-native";
 
-//customs
-import Header from "@/components/Header";
 import Container from "@/components/Container";
+import Header from "@/components/Header";
 import OptionCard from "@/components/OptionCard";
-import Button from "@/components/Button";
 
-// Acá tengo que aclarar, en caso me olvide, 
-// que hay un Button de React Native pero que se importa aquí el custom que está en components
-
-const PickUpMethod = () => {
+export default function PickUpMethodScreen() {
   const router = useRouter();
-  
-  const [selected, setSelected] = useState<string | null>(null);
-
-  // --- MOCK DATA ---
-  const pickUpOptions = [
-    { id: "inStore", label: "Recojo en tienda", icon: Store },
-    { id: "miniDelivery", label: "Mini-Delivery", icon: Bike },
-  ];
+  const { deliveryMethod, setDeliveryMethod } = useCheckoutStore();
 
   return (
     <Container>
-      <Header
-        title="Método de entrega"
-        showBack
-        showProfile
-        
-      />
-      <Text className="text-2xl font-bold mb-6 text-foreground">
-        Selecciona un método de entrega para tu pedido
-      </Text>
-
-      {pickUpOptions.map((option) => (
+      <Header title="Método de recogida" showBack />
+      <View className="mt-4 px-4">
         <OptionCard
-          key={option.id}
-          label={option.label}
-          icon={option.icon}
-          selected={selected === option.id}
-          onPress={() => setSelected(option.id)}
+          label="Recoger en tienda"
+          selected={deliveryMethod === "RECOGIDA_TIENDA"}
+          onPress={() => setDeliveryMethod("RECOGIDA_TIENDA")}
+          icon={Store}
         />
-      ))}
+        <OptionCard
+          label="Mini-delivery"
+          selected={deliveryMethod === "MINI_DELIVERY"}
+          onPress={() => setDeliveryMethod("MINI_DELIVERY")}
+          icon={Bike}
+        />
 
-      <View className="mt-8">
-        <Button 
-          variant="affirmative"
-          title="Continuar"
-          onPress={() => {
-            if (selected) {
-              console.log("Método de recojo elegido:", selected);
-                  router.push("/paymentMethod");
-            } else {
-              console.log("Debe elegir un método de recojo");
-            }
-          }}
-        />
+          <Pressable
+          className="bg-affirmative-light py-3 rounded-lg mt-6"
+          onPress={() => { router.push("/paymentMethod");}}
+          >
+          <Text className="text-white text-center font-bold">Continuar</Text>
+        </Pressable>
       </View>
     </Container>
   );
-};
-
-export default PickUpMethod;
+}
