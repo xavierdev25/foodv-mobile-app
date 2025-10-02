@@ -1,77 +1,67 @@
-import React from "react";
-import { FlatList } from "react-native";
-import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { View, TextInput, Pressable, FlatList, ActivityIndicator } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Text, TextInput, Pressable } from "react-native";
-
-//customs
+import { useAuth } from "@/contexts/AuthContext";
+// customs
 import Container from "@/components/Container";
-import ProductItem from "@/components/ProductItem";
 import Header from "@/components/Header";
+import ProductItem from "@/components/ProductItem";
 
-const mockProducts = [
-  {
-    id: "1",
-    name: "Hamburguesa Clásica",
-    price: 15,
-    image: "https://via.placeholder.com/150/771796",
-  },
-  {
-    id: "2",
-    name: "Pizza Pepperoni",
-    price: 22,
-    image: "https://via.placeholder.com/150/24f355",
-  },
-  {
-    id: "3",
-    name: "Ensalada César",
-    price: 12,
-    image: "https://via.placeholder.com/150/d32776",
-  },
-    {
-    id: "4",
-    name: "Hamburguesa Clásica",
-    price: 15,
-    image: "https://via.placeholder.com/150/771796",
-  },
-  {
-    id: "5",
-    name: "Pizza Pepperoni",
-    price: 22,
-    image: "https://via.placeholder.com/150/24f355",
-  },
-  {
-    id: "6",
-    name: "Ensalada César",
-    price: 12,
-    image: "https://via.placeholder.com/150/d32776",
-  },
-    {
-    id: "7",
-    name: "Pizza Pepperoni",
-    price: 22,
-    image: "https://via.placeholder.com/150/24f355",
-  },
-  {
-    id: "8",
-    name: "Ensalsada César",
-    price: 12,
-    image: "https://via.placeholder.com/150/d32776",
-  },
-];
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  imageUrl: string;
+  category: string;
+  isActive: boolean;
+  storeId: number;
+  storeName: string;
+  createdAt: string;
+};
 
 export default function ProductsScreen() {
   const router = useRouter();
-  
+  const { token } = useAuth();
+  const { storeId } = useLocalSearchParams<{ storeId: string }>();
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/products/store/${storeId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProducts(
+            data.data.map((p: Product) => ({
+              ...p,
+              imageUrl: p.imageUrl || "https://via.placeholder.com/150/771796",
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error cargando productos", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (storeId) fetchProducts();
+  }, [storeId, token]);
+
   return (
-    <Container >
-      <Header
-        title="Productos"
-        showBack
-        showProfile
-        showCart
-        cartCount={2}
-      />
+    <Container>
+      <Header title="Productos" showBack showProfile showCart cartCount={2} />
+
+      {/* Barra de búsqueda (no funcional todavía) */}
       <View className="flex-row items-center mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
         <Ionicons name="search" size={20} color="#6B7280" />
         <TextInput
@@ -83,93 +73,28 @@ export default function ProductsScreen() {
           <Ionicons name="options-outline" size={22} color="#6B7280" />
         </Pressable>
       </View>
-      <FlatList
-        data={mockProducts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ProductItem
-            name={item.name}
-            price={item.price}
-            image={item.image}
-            initialQuantity={0}
-            onChangeQuantity={(q) =>
-              console.log(`Producto ${item.id}, nueva cantidad: ${q}`)
-            }
-          />
-        )}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      />
+
+      {/* Lista de productos */}
+      {loading ? (
+        <ActivityIndicator size="large" className="mt-10" />
+      ) : (
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ProductItem
+              name={item.name}
+              price={Number(item.price)} // viene como BigDecimal
+              image={item.imageUrl}
+              initialQuantity={0}
+              onChangeQuantity={(q) =>
+                console.log(`Producto ${item.id}, nueva cantidad: ${q}`)
+              }
+            />
+          )}
+          contentContainerStyle={{ paddingBottom: 24 }}
+        />
+      )}
     </Container>
   );
 }
-
-/*
-// app/products.tsx
-import React, { useEffect, useState } from "react";
-import { FlatList, ActivityIndicator } from "react-native";
-import Container from "../components/Container";
-import ProductItem from "../components/ProductItem";
-import Header from "../components/Header";
-import { useLocalSearchParams } from "expo-router"; // para obtener el storeId de la ruta
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-}
-
-export default function ProductsScreen() {
-  const { storeId } = useLocalSearchParams(); // /products?storeId=123
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch(`https://api.midominio.com/stores/${storeId}/products`);
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        console.error("Error cargando productos", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [storeId]);
-
-  if (loading) {
-    return (
-      <Container layout="centered">
-        <ActivityIndicator size="large" />
-      </Container>
-    );
-  }
-
-  return (
-    <Container layout="padded">
-      <Header title="Productos" />
-
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ProductItem
-            name={item.name}
-            price={item.price}
-            image={item.image}
-            initialQuantity={0}
-            onChangeQuantity={(q) =>
-              console.log(`Producto ${item.id}, nueva cantidad: ${q}`)
-            }
-          />
-        )}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      />
-    </Container>
-  );
-}
-
-*/
